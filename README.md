@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wine List Scanner
 
-## Getting Started
+A web application that helps you choose the perfect wine from a restaurant's wine list based on your taste preferences. Simply scan the wine list with your phone's camera, describe your taste preferences, and get personalized recommendations from an AI sommelier.
 
-First, run the development server:
+## Features
 
+- Scan wine lists using your device's camera
+- Real-time text extraction using OCR (Optical Character Recognition)
+- AI-powered wine recommendations based on your taste profile
+- Mobile-friendly interface
+- Modern, responsive design
+
+## Prerequisites
+
+- Node.js 18+ installed
+- OpenAI API key
+
+## Setup
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd wine-list-scanner
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Create a `.env.local` file in the root directory and add your OpenAI API key:
+```
+OPENAI_API_KEY=your_api_key_here
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Start the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Enter your wine preferences in the taste profile text area (e.g., "I prefer full-bodied red wines with notes of dark fruits and moderate tannins").
+2. Click "Start Scanning" to activate your device's camera.
+3. Point the camera at the wine list.
+4. Click "Capture & Analyze" when the wine list is clearly visible.
+5. Wait for the AI to process the image and provide personalized wine recommendations.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technologies Used
 
-## Deploy on Vercel
+- Next.js 14
+- TypeScript
+- Tailwind CSS
+- Tesseract.js for OCR
+- OpenAI GPT-4 for wine recommendations
+- React Webcam for camera access
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

@@ -1,103 +1,126 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { Camera, CameraOff } from 'lucide-react';
+import type { WebcamProps } from 'react-webcam';
+
+const Webcam = dynamic<WebcamProps>(() => import('react-webcam').then((mod) => mod.default), {
+  ssr: false,
+});
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isScanning, setIsScanning] = useState(false);
+  const [tasteProfile, setTasteProfile] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  const handleScan = async (imageData: string | null) => {
+    if (!imageData || !tasteProfile) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch('/api/analyze-wine-list', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: imageData,
+          tasteProfile,
+        }),
+      });
+
+      const data = await response.json();
+      setResult(data.recommendation);
+    } catch (error) {
+      console.error('Error analyzing wine list:', error);
+      setResult('Error analyzing wine list. Please try again.');
+    }
+    setLoading(false);
+    setIsScanning(false);
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold text-center mb-8">Wine List Scanner</h1>
+      
+      <div className="max-w-md mx-auto space-y-6">
+        <div className="space-y-4">
+          <label className="block">
+            <span className="text-lg">Your Wine Taste Profile:</span>
+            <textarea
+              className="mt-1 block w-full rounded-md bg-gray-800 border-gray-700 text-white"
+              rows={3}
+              placeholder="Describe your wine preferences (e.g., I prefer full-bodied red wines with notes of dark fruits and moderate tannins)"
+              value={tasteProfile}
+              onChange={(e) => setTasteProfile(e.target.value)}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </label>
+
+          <div className="flex justify-center">
+            <button
+              onClick={() => setIsScanning(!isScanning)}
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md transition-colors"
+            >
+              {isScanning ? (
+                <>
+                  <CameraOff className="w-5 h-5" />
+                  Stop Scanning
+                </>
+              ) : (
+                <>
+                  <Camera className="w-5 h-5" />
+                  Start Scanning
+                </>
+              )}
+            </button>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {isScanning && (
+          <div className="relative">
+            <Webcam
+              className="rounded-lg w-full"
+              screenshotFormat="image/jpeg"
+              audio={false}
+              videoConstraints={{
+                facingMode: 'environment'
+              }}
+            />
+            <button
+              onClick={() => {
+                const webcam = document.querySelector('video');
+                if (webcam) {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = webcam.videoWidth;
+                  canvas.height = webcam.videoHeight;
+                  canvas.getContext('2d')?.drawImage(webcam, 0, 0);
+                  const image = canvas.toDataURL('image/jpeg');
+                  handleScan(image);
+                }
+              }}
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-md transition-colors"
+            >
+              Capture & Analyze
+            </button>
+          </div>
+        )}
+
+        {loading && (
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
+            <p className="mt-2">Analyzing wine list...</p>
+          </div>
+        )}
+
+        {result && (
+          <div className="bg-gray-800 rounded-lg p-4">
+            <h2 className="text-xl font-semibold mb-2">Recommendation:</h2>
+            <p>{result}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
