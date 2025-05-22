@@ -7,12 +7,17 @@ export default function Home() {
   const [tasteProfile, setTasteProfile] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !tasteProfile) return;
+    if (!file || !tasteProfile) {
+      setError('Please provide both a wine list image and your taste preferences');
+      return;
+    }
 
     setLoading(true);
+    setError(null);
     try {
       // Convert the file to base64
       const base64String = await new Promise((resolve) => {
@@ -24,6 +29,7 @@ export default function Home() {
         reader.readAsDataURL(file);
       });
 
+      console.log('Sending request to API...');
       const response = await fetch('/api/analyze-wine-list', {
         method: 'POST',
         headers: {
@@ -35,11 +41,20 @@ export default function Home() {
         }),
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze wine list');
+      }
+
       const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error);
+      }
       setResult(data.recommendation);
     } catch (error) {
-      console.error('Error analyzing wine list:', error);
-      setResult('Error analyzing wine list. Please try again.');
+      console.error('Error details:', error);
+      setError(error instanceof Error ? error.message : 'Failed to analyze wine list. Please try again.');
+      setResult('');
     }
     setLoading(false);
   };
@@ -84,6 +99,13 @@ export default function Home() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
             <p className="mt-2">Analyzing wine list...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 text-red-200">
+            <h2 className="text-xl font-semibold mb-2">Error</h2>
+            <p>{error}</p>
           </div>
         )}
 
