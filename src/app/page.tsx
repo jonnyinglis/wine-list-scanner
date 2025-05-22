@@ -3,11 +3,18 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Camera, CameraOff } from 'lucide-react';
-import type { WebcamProps } from 'react-webcam';
 
-const Webcam = dynamic<WebcamProps>(() => import('react-webcam').then((mod) => mod.default), {
-  ssr: false,
-});
+// Dynamically import Webcam with no SSR
+const WebcamComponent = dynamic(
+  async () => {
+    const mod = await import('react-webcam');
+    return mod.default;
+  },
+  {
+    ssr: false,
+    loading: () => <div className="h-64 w-full bg-gray-800 rounded-lg animate-pulse" />
+  }
+) as any; // Type assertion as temporary workaround for TypeScript issues
 
 export default function Home() {
   const [isScanning, setIsScanning] = useState(false);
@@ -80,13 +87,15 @@ export default function Home() {
 
         {isScanning && (
           <div className="relative">
-            <Webcam
+            <WebcamComponent
               className="rounded-lg w-full"
               screenshotFormat="image/jpeg"
               audio={false}
               videoConstraints={{
                 facingMode: 'environment'
               }}
+              onUserMedia={() => {}}
+              onUserMediaError={() => {}}
             />
             <button
               onClick={() => {
